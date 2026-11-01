@@ -65,3 +65,25 @@ if uploaded_file is not None:
             st.warning("Low confidence. Please upload a clearer leaf image.")
 
 st.info("This is an AI-assisted prediction, not a confirmed agricultural diagnosis.")
+
+
+# GPS Location Detection
+
+from streamlit_geolocation import streamlit_geolocation
+
+st.divider()
+st.subheader("📍 Farmer Location Detection")
+
+st.write("Click below and allow location access.")
+
+location = streamlit_geolocation()
+
+if location and location.get("latitude") is not None:
+    latitude = location["latitude"]
+    longitude = location["longitude"]
+
+    st.success("Location detected successfully!")
+    st.write(f"Latitude: {latitude}")
+    st.write(f"Longitude: {longitude}")
+else:
+    st.info("Please allow location access to detect your location.")
