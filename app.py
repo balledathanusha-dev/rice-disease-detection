@@ -77,7 +77,6 @@ st.divider()
 st.subheader("📍 Farmer Location Detection")
 
 st.write("Click below and allow location access.")
-
 location = streamlit_geolocation()
 
 if location and location.get("latitude") is not None:
@@ -91,9 +90,9 @@ if location and location.get("latitude") is not None:
     st.write(f"Longitude: {longitude}")
 
     # Weather Information
-
     st.subheader("🌦️ Local Weather Information")
-        if st.button("Get Weather Details"):
+
+    if st.button("Get Weather Details"):
 
         url = "https://api.open-meteo.com/v1/forecast"
 
@@ -131,7 +130,6 @@ if location and location.get("latitude") is not None:
             st.caption("Weather data source: Open-Meteo")
 
             # Environmental Disease Risk Prediction
-
             st.divider()
             st.subheader("🌱 Environmental Disease Risk Prediction")
 
@@ -183,7 +181,3 @@ if location and location.get("latitude") is not None:
 
 else:
     st.info("Please allow location access to detect your location.")
-
-
-
-   
