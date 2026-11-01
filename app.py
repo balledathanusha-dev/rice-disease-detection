@@ -1,4 +1,4 @@
-
+from google import genai
 import requests
 import streamlit as st
 import tensorflow as tf
@@ -260,6 +260,101 @@ if location:
         st.warning(
             "Location is not available yet. Please press the location button again."
         )
+        
+# AI FARMER ASSISTANT CHATBOT
+
+st.divider()
+st.header("🤖 AI Rice Farmer Assistant")
+
+st.write(
+    "Ask questions about rice diseases, symptoms, "
+    "prevention and crop management."
+)
+
+# Read API key securely from Streamlit Secrets
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+
+    client = genai.Client(api_key=api_key)
+
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    # Display previous messages
+    for message in st.session_state.chat_history:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # Farmer enters a question
+    user_question = st.chat_input(
+        "Ask about rice plant diseases..."
+    )
+
+    if user_question:
+
+        st.session_state.chat_history.append({
+            "role": "user",
+            "content": user_question
+        })
+
+        with st.chat_message("user"):
+            st.markdown(user_question)
+
+        system_prompt = """
+        You are an AI Rice Farming Assistant.
+
+        Help farmers understand rice plant diseases,
+        symptoms, prevention and general crop management.
+
+        Explain everything in simple language.
+
+        Give practical and safe suggestions.
+
+        Do not invent disease diagnoses or guarantee cures.
+        Do not recommend specific pesticide dosages.
+        Suggest consulting a local agricultural expert
+        before applying chemical treatments.
+
+        If you are unsure, clearly say so.
+        """
+
+        conversation = system_prompt + "\n\n"
+
+        for message in st.session_state.chat_history:
+            conversation += (
+                message["role"] + ": "
+                + message["content"] + "\n"
+            )
+
+        with st.chat_message("assistant"):
+            with st.spinner("Gemini is thinking..."):
+
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=conversation
+                )
+
+                answer = response.text
+
+                if not answer:
+                    answer = "Sorry, I could not generate an answer. Please try again."
+
+                st.markdown(answer)
+
+        st.session_state.chat_history.append({
+            "role": "assistant",
+            "content": answer
+        })
+
+except KeyError:
+    st.error(
+        "Gemini API key not found. Please configure "
+        "GEMINI_API_KEY in Streamlit Secrets."
+    )
+
+except Exception as e:
+    st.error(f"Chatbot error: {e}")
+
 
 else:
     st.info(
