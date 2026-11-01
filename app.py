@@ -9,7 +9,7 @@ st.set_page_config(
     page_icon="🌱"
 )
 
-MODEL_PATH = "/content/drive/MyDrive/Geo_Aware_Rice_Disease_Project/final_rice_disease_model.keras"
+MODEL_PATH = "final_rice_disease_model.keras"
 
 @st.cache_resource
 def load_model():
