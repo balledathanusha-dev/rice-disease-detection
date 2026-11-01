@@ -162,104 +162,120 @@ if uploaded_file is not None:
             "This is an AI-assisted prediction, not a confirmed agricultural diagnosis."
         )
 
-
 # GPS LOCATION DETECTION
+
 st.divider()
 st.subheader("📍 Farmer Location Detection")
 st.write("Click the location button and allow browser location access.")
 
+# Keep previously detected coordinates
+if "latitude" not in st.session_state:
+    st.session_state.latitude = None
+
+if "longitude" not in st.session_state:
+    st.session_state.longitude = None
+
 location = streamlit_geolocation()
 
+# Save new coordinates when available
 if location:
+    new_latitude = location.get("latitude")
+    new_longitude = location.get("longitude")
 
-    latitude = location.get("latitude")
-    longitude = location.get("longitude")
+    if new_latitude is not None and new_longitude is not None:
+        st.session_state.latitude = new_latitude
+        st.session_state.longitude = new_longitude
 
-    if latitude is not None and longitude is not None:
+# Use saved coordinates
+latitude = st.session_state.latitude
+longitude = st.session_state.longitude
 
-        st.success("Location detected successfully!")
-        st.write("Latitude:", latitude)
-        st.write("Longitude:", longitude)
+if latitude is not None and longitude is not None:
 
-        if st.button("Get Weather Details"):
+    st.success("Location detected successfully!")
+    st.write("Latitude:", latitude)
+    st.write("Longitude:", longitude)
 
-            try:
-                weather_url = "https://api.open-meteo.com/v1/forecast"
+    if st.button("Get Weather Details"):
 
-                params = {
-                    "latitude": latitude,
-                    "longitude": longitude,
-                    "current": "temperature_2m,relative_humidity_2m,precipitation,rain",
-                    "timezone": "auto"
-                }
+        try:
+            weather_url = "https://api.open-meteo.com/v1/forecast"
 
-                response = requests.get(
-                    weather_url,
-                    params=params,
-                    timeout=20
-                )
+            params = {
+                "latitude": latitude,
+                "longitude": longitude,
+                "current": "temperature_2m,relative_humidity_2m,precipitation,rain",
+                "timezone": "auto"
+            }
 
-                response.raise_for_status()
+            response = requests.get(
+                weather_url,
+                params=params,
+                timeout=20
+            )
 
-                weather = response.json()["current"]
+            response.raise_for_status()
 
-                temperature = weather["temperature_2m"]
-                humidity = weather["relative_humidity_2m"]
-                rainfall = weather["precipitation"]
-                rain = weather["rain"]
+            weather = response.json()["current"]
 
-                st.subheader("🌦️ Current Weather Details")
-                st.write("Temperature:", temperature, "°C")
-                st.write("Humidity:", humidity, "%")
-                st.write("Rainfall:", rainfall, "mm")
-                st.write("Rain:", rain, "mm")
+            temperature = weather["temperature_2m"]
+            humidity = weather["relative_humidity_2m"]
+            rainfall = weather["precipitation"]
+            rain = weather["rain"]
 
-                risk_score = 0
+            st.subheader("🌦️ Current Weather Details")
+            st.write("Temperature:", temperature, "°C")
+            st.write("Humidity:", humidity, "%")
+            st.write("Rainfall:", rainfall, "mm")
+            st.write("Rain:", rain, "mm")
 
-                if humidity >= 85:
-                    risk_score += 40
-                elif humidity >= 70:
-                    risk_score += 25
-                elif humidity >= 60:
-                    risk_score += 10
+            risk_score = 0
 
-                if 25 <= temperature <= 32:
-                    risk_score += 30
-                elif 20 <= temperature < 25 or 32 < temperature <= 35:
-                    risk_score += 15
+            if humidity >= 85:
+                risk_score += 40
+            elif humidity >= 70:
+                risk_score += 25
+            elif humidity >= 60:
+                risk_score += 10
 
-                if rainfall >= 5:
-                    risk_score += 30
-                elif rainfall > 0:
-                    risk_score += 15
+            if 25 <= temperature <= 32:
+                risk_score += 30
+            elif 20 <= temperature < 25 or 32 < temperature <= 35:
+                risk_score += 15
 
-                risk_score = min(risk_score, 100)
+            if rainfall >= 5:
+                risk_score += 30
+            elif rainfall > 0:
+                risk_score += 15
 
-                st.subheader("🌱 Environmental Risk Indicator")
-                st.write("Risk Score:", risk_score, "/100")
+            risk_score = min(risk_score, 100)
 
-                if risk_score < 40:
-                    st.success("Low Environmental Risk")
-                elif risk_score < 70:
-                    st.warning("Moderate Environmental Risk")
-                else:
-                    st.error("High Environmental Risk")
+            st.subheader("🌱 Environmental Risk Indicator")
+            st.write("Risk Score:", risk_score, "/100")
 
-                st.caption(
-                    "This is an initial rule-based environmental indicator, "
-                    "not a scientifically validated disease probability."
-                )
+            if risk_score < 40:
+                st.success("Low Environmental Risk")
+            elif risk_score < 70:
+                st.warning("Moderate Environmental Risk")
+            else:
+                st.error("High Environmental Risk")
 
-            except requests.exceptions.RequestException as e:
-                st.error(f"Unable to retrieve weather: {e}")
+            st.caption(
+                "This is an initial rule-based environmental indicator, "
+                "not a scientifically validated disease probability."
+            )
 
-            except (KeyError, TypeError, ValueError) as e:
-                st.error(f"Unable to process weather information: {e}")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Unable to retrieve weather: {e}")
 
-    else:
-        st.warning(
-            "Location is not available yet. Please press the location button again."
-        )
+        except (KeyError, TypeError, ValueError) as e:
+            st.error(f"Unable to process weather information: {e}")
+
+else:
+    st.info(
+        "Please click the location button and allow browser location access."
+    )
+
         
 # AI FARMER ASSISTANT CHATBOT
 
@@ -354,9 +370,3 @@ except KeyError:
 
 except Exception as e:
     st.error(f"Chatbot error: {e}")
-
-
-else:
-    st.info(
-        "Please click the location button and allow browser location access."
-    )
