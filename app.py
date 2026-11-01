@@ -65,6 +65,35 @@ if uploaded_file is not None:
             st.warning("Low confidence. Please upload a clearer leaf image.")
 
 st.info("This is an AI-assisted prediction, not a confirmed agricultural diagnosis.")
+# Disease-specific recommendations
+
+disease_recommendations = {
+    "Healthy": "Your rice leaf appears healthy. Continue regular crop monitoring.",
+
+    "bacterial_leaf_blight": "Monitor for yellowing and drying of leaf edges. Maintain proper water management and avoid excessive nitrogen fertilizer.",
+
+    "brown_spot": "Check soil fertility and crop nutrition. Use balanced fertilizers and monitor new leaf growth.",
+
+    "leaf_blast": "Monitor for spindle-shaped leaf lesions. Avoid excessive nitrogen and seek local agricultural advice.",
+
+    "leaf_scald": "Monitor leaf tips and margins for drying symptoms. Maintain proper field management.",
+
+    "narrow_brown_spot": "Check for narrow brown lesions on leaves. Maintain balanced crop nutrition.",
+
+    "neck_blast": "Inspect rice necks and panicles for symptoms. Seek prompt advice from an agricultural expert.",
+
+    "rice_hispa": "Inspect leaves for scraping damage and adult beetles. Monitor the crop for rice hispa insects.",
+
+    "sheath_blight": "Monitor lesions on leaf sheaths. Avoid excessive nitrogen and maintain proper plant spacing.",
+
+    "tungro": "Look for yellow-orange leaf discoloration and stunted growth. Monitor for green leafhoppers and seek agricultural advice."
+}
+
+if predicted_disease in disease_recommendations:
+
+    st.subheader("🌾 Disease-specific Recommendations")
+
+    st.info(disease_recommendations[predicted_disease])
 
 
 
