@@ -153,7 +153,7 @@ if uploaded_file is not None:
         st.write("Click below and allow location access.")
 
         location = streamlit_geolocation()
-
+        st.write("GPS Debug Output:", location)
         if location:
             latitude = location.get("latitude")
             longitude = location.get("longitude")
