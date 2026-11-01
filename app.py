@@ -1,9 +1,10 @@
+
 import requests
-import streamlit.components.v1 as components
 import streamlit as st
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+from streamlit_geolocation import streamlit_geolocation
 
 st.set_page_config(
     page_title="Rice Disease Detection",
@@ -12,9 +13,11 @@ st.set_page_config(
 
 MODEL_PATH = "final_rice_disease_model.keras"
 
+
 @st.cache_resource
 def load_model():
     return tf.keras.models.load_model(MODEL_PATH, compile=False)
+
 
 model = load_model()
 
@@ -43,7 +46,11 @@ if uploaded_file is not None:
 
     image = Image.open(uploaded_file).convert("RGB")
 
-    st.image(image, caption="Uploaded Rice Leaf", use_container_width=True)
+    st.image(
+        image,
+        caption="Uploaded Rice Leaf",
+        use_container_width=True
+    )
 
     if st.button("Predict Disease"):
 
@@ -53,16 +60,20 @@ if uploaded_file is not None:
         image_array = np.expand_dims(image_array, axis=0)
 
         prediction = model.predict(image_array)
+
         predicted_index = np.argmax(prediction[0])
         predicted_disease = class_names[predicted_index]
         confidence = prediction[0][predicted_index] * 100
+
         st.subheader("Prediction Result")
         st.success(f"Predicted Disease: {predicted_disease}")
         st.write(f"Confidence: {confidence:.2f}%")
+
         if confidence < 60:
-            st.warning("Low confidence. Please upload a clearer leaf image.")
-       
-        # Detailed disease information
+            st.warning(
+                "Low confidence. Please upload a clearer leaf image."
+            )
+
         disease_details = {
             "Healthy": {
                 "Symptoms": "No visible disease symptoms detected.",
@@ -143,54 +154,35 @@ if uploaded_file is not None:
             for heading, information in details.items():
                 st.markdown(f"**{heading}:** {information}")
         else:
-            st.info("Please consult an agricultural expert for further guidance.")
+            st.info(
+                "Please consult an agricultural expert for further guidance."
+            )
 
-        st.info("This is an AI-assisted prediction, not a confirmed agricultural diagnosis.")
-# GPS Location Detection
-st.subheader("📍 GPS Location Test")
-components.html(
-    """
-    <button onclick="getLocation()">Get My Location</button>
-    <p id="result">Click the button to detect location.</p>
+        st.info(
+            "This is an AI-assisted prediction, not a confirmed agricultural diagnosis."
+        )
 
-    <script>
-    function getLocation() {
-        const result = document.getElementById("result");
 
-        if (!navigator.geolocation) {
-            result.innerHTML = "Geolocation is not supported by this browser.";
-            return;
-        }
+# GPS LOCATION DETECTION
+st.divider()
+st.subheader("📍 Farmer Location Detection")
+st.write("Click the location button and allow browser location access.")
 
-        result.innerHTML = "Getting location...";
+location = streamlit_geolocation()
 
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                result.innerHTML =
-                    "Latitude: " + position.coords.latitude +
-                    "<br>Longitude: " + position.coords.longitude;
-            },
-            function(error) {
-                result.innerHTML = "GPS Error: " + error.message +
-                    " (Code: " + error.code + ")";
-            },
-            {enableHighAccuracy: true, timeout: 15000}
-        );
-    }
-    </script>
-    """,
-    height=150
-)
 if location:
+
     latitude = location.get("latitude")
     longitude = location.get("longitude")
 
     if latitude is not None and longitude is not None:
+
         st.success("Location detected successfully!")
         st.write("Latitude:", latitude)
         st.write("Longitude:", longitude)
 
         if st.button("Get Weather Details"):
+
             try:
                 weather_url = "https://api.open-meteo.com/v1/forecast"
 
@@ -206,6 +198,7 @@ if location:
                     params=params,
                     timeout=20
                 )
+
                 response.raise_for_status()
 
                 weather = response.json()["current"]
@@ -257,12 +250,18 @@ if location:
                     "not a scientifically validated disease probability."
                 )
 
-            except Exception as e:
+            except requests.exceptions.RequestException as e:
                 st.error(f"Unable to retrieve weather: {e}")
 
+            except (KeyError, TypeError, ValueError) as e:
+                st.error(f"Unable to process weather information: {e}")
+
     else:
-        st.warning("Waiting for location permission. Please allow location access.")
+        st.warning(
+            "Location is not available yet. Please press the location button again."
+        )
 
 else:
-    st.info("Please click the location button and allow browser location access.")
-       
+    st.info(
+        "Please click the location button and allow browser location access."
+    )
