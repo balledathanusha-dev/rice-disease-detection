@@ -60,24 +60,88 @@ if uploaded_file is not None:
         st.write(f"Confidence: {confidence:.2f}%")
         if confidence < 60:
             st.warning("Low confidence. Please upload a clearer leaf image.")
-        # Disease-specific recommendations
-        disease_recommendations = {
-            "Healthy": "Your rice leaf appears healthy. Continue regular crop monitoring.",
-            "bacterial_leaf_blight": "Monitor yellowing and drying of leaf edges. Maintain proper water management.",
-            "brown_spot": "Check soil fertility and crop nutrition.",
-            "leaf_blast": "Monitor for spindle-shaped leaf lesions.",
-            "leaf_scald": "Monitor leaf tips and margins for drying symptoms.",
-            "narrow_brown_spot": "Check for narrow brown lesions and maintain balanced crop nutrition.",
-            "neck_blast": "Inspect rice necks and panicles for symptoms.",
-            "rice_hispa": "Inspect leaves for scraping damage and rice hispa insects.",
-            "sheath_blight": "Monitor lesions on leaf sheaths and maintain proper plant spacing.",
-            "tungro": "Monitor yellow-orange leaf discoloration and green leafhoppers."
+       
+        # Detailed disease information
+        disease_details = {
+            "Healthy": {
+                "Symptoms": "No visible disease symptoms detected.",
+                "Possible Causes": "Not applicable. Continue regular crop monitoring.",
+                "Management Tips": "Maintain balanced nutrition, proper irrigation and regular field inspections.",
+                "Expert Advice": "Continue monitoring the crop throughout the growing season."
+            },
+
+            "brown_spot": {
+                "Symptoms": "Small circular or oval brown spots may appear on rice leaves.",
+                "Possible Causes": "The disease is caused by a fungus. Poor soil fertility and environmental stress may increase its severity.",
+                "Management Tips": "Maintain balanced soil nutrition, use healthy seeds and follow recommended field management practices.",
+                "Expert Advice": "Consult an agricultural expert if symptoms spread or become severe."
+            },
+
+            "bacterial_leaf_blight": {
+                "Symptoms": "Water-soaked lesions and yellowing may appear along leaf edges.",
+                "Possible Causes": "Caused by the bacterium Xanthomonas oryzae pv. oryzae.",
+                "Management Tips": "Use resistant varieties and follow recommended water and field management practices.",
+                "Expert Advice": "Seek agricultural guidance if the disease spreads across the field."
+            },
+
+            "leaf_blast": {
+                "Symptoms": "Spindle-shaped lesions with grey or whitish centres may appear on leaves.",
+                "Possible Causes": "Caused by the fungus Magnaporthe oryzae.",
+                "Management Tips": "Avoid excessive nitrogen application and use resistant varieties where available.",
+                "Expert Advice": "Consult an agricultural expert for suitable disease management."
+            },
+
+            "leaf_scald": {
+                "Symptoms": "Leaves may develop brown or straw-coloured areas starting near the tips.",
+                "Possible Causes": "Caused by the fungus Microdochium oryzae.",
+                "Management Tips": "Maintain balanced fertilizer application and follow good crop management.",
+                "Expert Advice": "Get expert guidance if leaf damage increases."
+            },
+
+            "narrow_brown_spot": {
+                "Symptoms": "Narrow, elongated brown lesions may appear on rice leaves.",
+                "Possible Causes": "Caused by the fungus Cercospora janseana.",
+                "Management Tips": "Maintain balanced crop nutrition and monitor affected plants.",
+                "Expert Advice": "Consult an agricultural expert for confirmation and management."
+            },
+
+            "neck_blast": {
+                "Symptoms": "Dark lesions may develop around the neck of the rice panicle.",
+                "Possible Causes": "Caused by the fungus Magnaporthe oryzae.",
+                "Management Tips": "Use resistant varieties and follow recommended crop protection practices.",
+                "Expert Advice": "Seek prompt expert advice because panicle infection can affect grain production."
+            },
+
+            "rice_hispa": {
+                "Symptoms": "Leaves may show white streaks and scraped areas caused by insect feeding.",
+                "Possible Causes": "Feeding damage from rice hispa beetles and their larvae.",
+                "Management Tips": "Monitor fields for beetles and damaged leaves. Follow locally recommended pest management.",
+                "Expert Advice": "Consult an agricultural officer if insect damage increases."
+            },
+
+            "sheath_blight": {
+                "Symptoms": "Oval or irregular greenish-grey lesions may develop on leaf sheaths.",
+                "Possible Causes": "Caused by the fungus Rhizoctonia solani.",
+                "Management Tips": "Avoid excessive nitrogen and maintain appropriate plant spacing.",
+                "Expert Advice": "Seek expert guidance if lesions spread to upper plant parts."
+            },
+
+            "tungro": {
+                "Symptoms": "Plants may show yellow or orange leaf discoloration and stunted growth.",
+                "Possible Causes": "A viral disease transmitted by green leafhoppers.",
+                "Management Tips": "Monitor leafhopper populations and follow locally recommended vector management.",
+                "Expert Advice": "Consult an agricultural expert for confirmation and suitable management."
+            }
         }
 
-        st.subheader("🌾 Disease-specific Recommendations")
-        st.info(disease_recommendations.get(
-            predicted_disease,
-            "Consult a local agricultural expert for guidance."
-        ))
+        st.subheader("🌾 Detailed Disease Information")
+
+        details = disease_details.get(predicted_disease)
+
+        if details:
+            for heading, information in details.items():
+                st.markdown(f"**{heading}:** {information}")
+        else:
+            st.info("Please consult an agricultural expert for further guidance.")
 
         st.info("This is an AI-assisted prediction, not a confirmed agricultural diagnosis.")
