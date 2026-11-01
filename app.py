@@ -87,3 +87,60 @@ if location and location.get("latitude") is not None:
     st.write(f"Longitude: {longitude}")
 else:
     st.info("Please allow location access to detect your location.")
+
+
+
+    # Weather Information
+
+    import requests
+
+    st.subheader("🌦️ Local Weather Information")
+
+    if st.button("Get Weather Details"):
+
+        url = "https://api.open-meteo.com/v1/forecast"
+
+        params = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "current": "temperature_2m,relative_humidity_2m,precipitation,rain",
+            "timezone": "auto"
+        }
+
+        try:
+            response = requests.get(url, params=params, timeout=20)
+            response.raise_for_status()
+
+            weather = response.json()
+            current = weather["current"]
+
+            st.success("Weather data retrieved successfully!")
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.metric(
+                    "Temperature",
+                    f'{current["temperature_2m"]} °C'
+                )
+
+                st.metric(
+                    "Humidity",
+                    f'{current["relative_humidity_2m"]} %'
+                )
+
+            with col2:
+                st.metric(
+                    "Rainfall",
+                    f'{current["precipitation"]} mm'
+                )
+
+                st.metric(
+                    "Rain",
+                    f'{current["rain"]} mm'
+                )
+
+            st.caption("Weather data source: Open-Meteo")
+
+        except Exception as e:
+            st.error(f"Unable to retrieve weather: {e}")
