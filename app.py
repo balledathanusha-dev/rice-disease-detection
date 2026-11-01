@@ -52,161 +52,32 @@ if uploaded_file is not None:
         image_array = np.expand_dims(image_array, axis=0)
 
         prediction = model.predict(image_array)
-
         predicted_index = np.argmax(prediction[0])
         predicted_disease = class_names[predicted_index]
         confidence = prediction[0][predicted_index] * 100
-
         st.subheader("Prediction Result")
         st.success(f"Predicted Disease: {predicted_disease}")
         st.write(f"Confidence: {confidence:.2f}%")
-
         if confidence < 60:
             st.warning("Low confidence. Please upload a clearer leaf image.")
-
-st.info("This is an AI-assisted prediction, not a confirmed agricultural diagnosis.")
-# Disease-specific recommendations
-
-disease_recommendations = {
-    "Healthy": "Your rice leaf appears healthy. Continue regular crop monitoring.",
-
-    "bacterial_leaf_blight": "Monitor for yellowing and drying of leaf edges. Maintain proper water management and avoid excessive nitrogen fertilizer.",
-
-    "brown_spot": "Check soil fertility and crop nutrition. Use balanced fertilizers and monitor new leaf growth.",
-
-    "leaf_blast": "Monitor for spindle-shaped leaf lesions. Avoid excessive nitrogen and seek local agricultural advice.",
-
-    "leaf_scald": "Monitor leaf tips and margins for drying symptoms. Maintain proper field management.",
-
-    "narrow_brown_spot": "Check for narrow brown lesions on leaves. Maintain balanced crop nutrition.",
-
-    "neck_blast": "Inspect rice necks and panicles for symptoms. Seek prompt advice from an agricultural expert.",
-
-    "rice_hispa": "Inspect leaves for scraping damage and adult beetles. Monitor the crop for rice hispa insects.",
-
-    "sheath_blight": "Monitor lesions on leaf sheaths. Avoid excessive nitrogen and maintain proper plant spacing.",
-
-    "tungro": "Look for yellow-orange leaf discoloration and stunted growth. Monitor for green leafhoppers and seek agricultural advice."
-}
-
-if predicted_disease in disease_recommendations:
-
-    st.subheader("🌾 Disease-specific Recommendations")
-
-    st.info(disease_recommendations[predicted_disease])
-
-
-
-# GPS Location Detection
-
-from streamlit_geolocation import streamlit_geolocation
-import requests
-
-st.divider()
-st.subheader("📍 Farmer Location Detection")
-
-st.write("Click below and allow location access.")
-location = streamlit_geolocation()
-
-if location and location.get("latitude") is not None:
-
-    latitude = location["latitude"]
-    longitude = location["longitude"]
-
-    st.success("Location detected successfully!")
-
-    st.write(f"Latitude: {latitude}")
-    st.write(f"Longitude: {longitude}")
-
-    # Weather Information
-    st.subheader("🌦️ Local Weather Information")
-
-    if st.button("Get Weather Details"):
-
-        url = "https://api.open-meteo.com/v1/forecast"
-
-        params = {
-            "latitude": latitude,
-            "longitude": longitude,
-            "current": "temperature_2m,relative_humidity_2m,precipitation,rain",
-            "timezone": "auto"
+        # Disease-specific recommendations
+        disease_recommendations = {
+            "Healthy": "Your rice leaf appears healthy. Continue regular crop monitoring.",
+            "bacterial_leaf_blight": "Monitor yellowing and drying of leaf edges. Maintain proper water management.",
+            "brown_spot": "Check soil fertility and crop nutrition.",
+            "leaf_blast": "Monitor for spindle-shaped leaf lesions.",
+            "leaf_scald": "Monitor leaf tips and margins for drying symptoms.",
+            "narrow_brown_spot": "Check for narrow brown lesions and maintain balanced crop nutrition.",
+            "neck_blast": "Inspect rice necks and panicles for symptoms.",
+            "rice_hispa": "Inspect leaves for scraping damage and rice hispa insects.",
+            "sheath_blight": "Monitor lesions on leaf sheaths and maintain proper plant spacing.",
+            "tungro": "Monitor yellow-orange leaf discoloration and green leafhoppers."
         }
 
-        try:
-            response = requests.get(
-                url,
-                params=params,
-                timeout=20
-            )
+        st.subheader("🌾 Disease-specific Recommendations")
+        st.info(disease_recommendations.get(
+            predicted_disease,
+            "Consult a local agricultural expert for guidance."
+        ))
 
-            response.raise_for_status()
-
-            weather = response.json()
-            current = weather["current"]
-
-            st.success("Weather data retrieved successfully!")
-
-            col1, col2 = st.columns(2)
-
-            with col1:
-                st.metric("Temperature", f'{current["temperature_2m"]} °C')
-                st.metric("Humidity", f'{current["relative_humidity_2m"]} %')
-
-            with col2:
-                st.metric("Rainfall", f'{current["precipitation"]} mm')
-                st.metric("Rain", f'{current["rain"]} mm')
-
-            st.caption("Weather data source: Open-Meteo")
-
-            # Environmental Disease Risk Prediction
-            st.divider()
-            st.subheader("🌱 Environmental Disease Risk Prediction")
-
-            temperature = current["temperature_2m"]
-            humidity = current["relative_humidity_2m"]
-            rainfall = current["precipitation"]
-
-            risk_score = 0
-
-            if humidity >= 85:
-                risk_score += 40
-            elif humidity >= 70:
-                risk_score += 25
-            elif humidity >= 60:
-                risk_score += 10
-
-            if 25 <= temperature <= 32:
-                risk_score += 30
-            elif 20 <= temperature < 25 or 32 < temperature <= 35:
-                risk_score += 15
-
-            if rainfall >= 5:
-                risk_score += 30
-            elif rainfall > 0:
-                risk_score += 15
-
-            risk_score = min(risk_score, 100)
-
-            if risk_score >= 70:
-                risk_level = "High"
-                st.error("High environmental risk")
-            elif risk_score >= 40:
-                risk_level = "Moderate"
-                st.warning("Moderate environmental risk")
-            else:
-                risk_level = "Low"
-                st.success("Low environmental risk")
-
-            st.metric("Environmental Risk Score", f"{risk_score}/100")
-            st.write("Risk Level:", risk_level)
-
-            st.caption(
-                "Initial weather-based indicator, not a confirmed "
-                "disease probability."
-            )
-
-        except Exception as e:
-            st.error(f"Unable to retrieve weather: {e}")
-
-else:
-    st.info("Please allow location access to detect your location.")
+        st.info("This is an AI-assisted prediction, not a confirmed agricultural diagnosis.")
