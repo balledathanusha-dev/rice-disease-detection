@@ -93,8 +93,7 @@ if location and location.get("latitude") is not None:
     # Weather Information
 
     st.subheader("🌦️ Local Weather Information")
-
-    if st.button("Get Weather Details"):
+        if st.button("Get Weather Details"):
 
         url = "https://api.open-meteo.com/v1/forecast"
 
@@ -130,59 +129,61 @@ if location and location.get("latitude") is not None:
                 st.metric("Rain", f'{current["rain"]} mm')
 
             st.caption("Weather data source: Open-Meteo")
+
             # Environmental Disease Risk Prediction
 
-st.divider()
-st.subheader("🌱 Environmental Disease Risk Prediction")
+            st.divider()
+            st.subheader("🌱 Environmental Disease Risk Prediction")
 
-temperature = current["temperature_2m"]
-humidity = current["relative_humidity_2m"]
-rainfall = current["precipitation"]
+            temperature = current["temperature_2m"]
+            humidity = current["relative_humidity_2m"]
+            rainfall = current["precipitation"]
 
-risk_score = 0
+            risk_score = 0
 
-# Humidity contribution
-if humidity >= 85:
-    risk_score += 40
-elif humidity >= 70:
-    risk_score += 25
-elif humidity >= 60:
-    risk_score += 10
+            if humidity >= 85:
+                risk_score += 40
+            elif humidity >= 70:
+                risk_score += 25
+            elif humidity >= 60:
+                risk_score += 10
 
-# Temperature contribution
-if 25 <= temperature <= 32:
-    risk_score += 30
-elif 20 <= temperature < 25 or 32 < temperature <= 35:
-    risk_score += 15
+            if 25 <= temperature <= 32:
+                risk_score += 30
+            elif 20 <= temperature < 25 or 32 < temperature <= 35:
+                risk_score += 15
 
-# Rainfall contribution
-if rainfall >= 5:
-    risk_score += 30
-elif rainfall > 0:
-    risk_score += 15
+            if rainfall >= 5:
+                risk_score += 30
+            elif rainfall > 0:
+                risk_score += 15
 
-risk_score = min(risk_score, 100)
+            risk_score = min(risk_score, 100)
 
-if risk_score >= 70:
-    risk_level = "High"
-    st.error("⚠️ High environmental risk")
-elif risk_score >= 40:
-    risk_level = "Moderate"
-    st.warning("⚠️ Moderate environmental risk")
-else:
-    risk_level = "Low"
-    st.success("✅ Low environmental risk")
+            if risk_score >= 70:
+                risk_level = "High"
+                st.error("High environmental risk")
+            elif risk_score >= 40:
+                risk_level = "Moderate"
+                st.warning("Moderate environmental risk")
+            else:
+                risk_level = "Low"
+                st.success("Low environmental risk")
 
-st.metric("Environmental Risk Score", f"{risk_score}/100")
-st.write("Risk Level:", risk_level)
+            st.metric("Environmental Risk Score", f"{risk_score}/100")
+            st.write("Risk Level:", risk_level)
 
-st.caption(
-    "This is an initial weather-based indicator, "
-    "not a confirmed disease probability."
-)
+            st.caption(
+                "Initial weather-based indicator, not a confirmed "
+                "disease probability."
+            )
 
         except Exception as e:
             st.error(f"Unable to retrieve weather: {e}")
 
 else:
     st.info("Please allow location access to detect your location.")
+
+
+
+   
