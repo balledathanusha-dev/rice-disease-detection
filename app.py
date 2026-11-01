@@ -146,95 +146,98 @@ if uploaded_file is not None:
             st.info("Please consult an agricultural expert for further guidance.")
 
         st.info("This is an AI-assisted prediction, not a confirmed agricultural diagnosis.")
-        # GPS Location Detection
-        st.divider()
-        st.subheader("📍 Farmer Location Detection")
+# GPS Location Detection
+st.divider()
+st.subheader("📍 Farmer Location Detection")
 
-        st.write("Click below and allow location access.")
+st.write("Click below and allow location access.")
 
-        location = streamlit_geolocation()
-        st.write("GPS Debug Output:", location)
-        if location:
-            latitude = location.get("latitude")
-            longitude = location.get("longitude")
+location = streamlit_geolocation()
 
-            if latitude is not None and longitude is not None:
-                st.success("Location detected successfully!")
-                st.write("Latitude:", latitude)
-                st.write("Longitude:", longitude)
+st.write("GPS Debug Output:", location)
 
-                if st.button("Get Weather Details"):
-                    try:
-                        weather_url = "https://api.open-meteo.com/v1/forecast"
+if location:
+    latitude = location.get("latitude")
+    longitude = location.get("longitude")
 
-                        params = {
-                            "latitude": latitude,
-                            "longitude": longitude,
-                            "current": "temperature_2m,relative_humidity_2m,precipitation,rain",
-                            "timezone": "auto"
-                        }
+    if latitude is not None and longitude is not None:
+        st.success("Location detected successfully!")
+        st.write("Latitude:", latitude)
+        st.write("Longitude:", longitude)
 
-                        response = requests.get(
-                            weather_url,
-                            params=params,
-                            timeout=20
-                        )
-                        response.raise_for_status()
+        if st.button("Get Weather Details"):
+            try:
+                weather_url = "https://api.open-meteo.com/v1/forecast"
 
-                        weather = response.json()["current"]
+                params = {
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "current": "temperature_2m,relative_humidity_2m,precipitation,rain",
+                    "timezone": "auto"
+                }
 
-                        temperature = weather["temperature_2m"]
-                        humidity = weather["relative_humidity_2m"]
-                        rainfall = weather["precipitation"]
-                        rain = weather["rain"]
+                response = requests.get(
+                    weather_url,
+                    params=params,
+                    timeout=20
+                )
+                response.raise_for_status()
 
-                        st.subheader("🌦️ Current Weather Details")
-                        st.write("Temperature:", temperature, "°C")
-                        st.write("Humidity:", humidity, "%")
-                        st.write("Rainfall:", rainfall, "mm")
-                        st.write("Rain:", rain, "mm")
+                weather = response.json()["current"]
 
-                        risk_score = 0
+                temperature = weather["temperature_2m"]
+                humidity = weather["relative_humidity_2m"]
+                rainfall = weather["precipitation"]
+                rain = weather["rain"]
 
-                        if humidity >= 85:
-                            risk_score += 40
-                        elif humidity >= 70:
-                            risk_score += 25
-                        elif humidity >= 60:
-                            risk_score += 10
+                st.subheader("🌦️ Current Weather Details")
+                st.write("Temperature:", temperature, "°C")
+                st.write("Humidity:", humidity, "%")
+                st.write("Rainfall:", rainfall, "mm")
+                st.write("Rain:", rain, "mm")
 
-                        if 25 <= temperature <= 32:
-                            risk_score += 30
-                        elif 20 <= temperature < 25 or 32 < temperature <= 35:
-                            risk_score += 15
+                risk_score = 0
 
-                        if rainfall >= 5:
-                            risk_score += 30
-                        elif rainfall > 0:
-                            risk_score += 15
+                if humidity >= 85:
+                    risk_score += 40
+                elif humidity >= 70:
+                    risk_score += 25
+                elif humidity >= 60:
+                    risk_score += 10
 
-                        risk_score = min(risk_score, 100)
+                if 25 <= temperature <= 32:
+                    risk_score += 30
+                elif 20 <= temperature < 25 or 32 < temperature <= 35:
+                    risk_score += 15
 
-                        st.subheader("🌱 Environmental Risk Indicator")
-                        st.write("Risk Score:", risk_score, "/100")
+                if rainfall >= 5:
+                    risk_score += 30
+                elif rainfall > 0:
+                    risk_score += 15
 
-                        if risk_score < 40:
-                            st.success("Low Environmental Risk")
-                        elif risk_score < 70:
-                            st.warning("Moderate Environmental Risk")
-                        else:
-                            st.error("High Environmental Risk")
+                risk_score = min(risk_score, 100)
 
-                        st.caption(
-                            "This is an initial rule-based environmental indicator, "
-                            "not a scientifically validated disease probability."
-                        )
+                st.subheader("🌱 Environmental Risk Indicator")
+                st.write("Risk Score:", risk_score, "/100")
 
-                    except Exception as e:
-                        st.error(f"Unable to retrieve weather: {e}")
+                if risk_score < 40:
+                    st.success("Low Environmental Risk")
+                elif risk_score < 70:
+                    st.warning("Moderate Environmental Risk")
+                else:
+                    st.error("High Environmental Risk")
 
-            else:
-                st.warning("Waiting for location permission. Please allow location access.")
+                st.caption(
+                    "This is an initial rule-based environmental indicator, "
+                    "not a scientifically validated disease probability."
+                )
 
-        else:
-            st.info("Please click the location button and allow browser location access.")
+            except Exception as e:
+                st.error(f"Unable to retrieve weather: {e}")
+
+    else:
+        st.warning("Waiting for location permission. Please allow location access.")
+
+else:
+    st.info("Please click the location button and allow browser location access.")
+       
