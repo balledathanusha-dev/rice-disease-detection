@@ -1,4 +1,5 @@
-
+import requests
+from streamlit_geolocation import streamlit_geolocation
 import streamlit as st
 import tensorflow as tf
 import numpy as np
@@ -145,3 +146,94 @@ if uploaded_file is not None:
             st.info("Please consult an agricultural expert for further guidance.")
 
         st.info("This is an AI-assisted prediction, not a confirmed agricultural diagnosis.")
+        # GPS Location Detection
+        st.divider()
+        st.subheader("📍 Farmer Location Detection")
+
+        st.write("Click below and allow location access.")
+
+        location = streamlit_geolocation()
+
+        if location and location.get("latitude") is not None:
+            latitude = location["latitude"]
+            longitude = location["longitude"]
+
+            st.success("Location detected successfully!")
+            st.write("Latitude:", latitude)
+            st.write("Longitude:", longitude)
+
+            if st.button("Get Weather Details"):
+                try:
+                    weather_url = "https://api.open-meteo.com/v1/forecast"
+
+                    params = {
+                        "latitude": latitude,
+                        "longitude": longitude,
+                        "current": "temperature_2m,relative_humidity_2m,precipitation,rain",
+                        "timezone": "auto"
+                    }
+
+                    response = requests.get(
+                        weather_url,
+                        params=params,
+                        timeout=20
+                    )
+
+                    response.raise_for_status()
+                    weather = response.json()["current"]
+
+                    temperature = weather["temperature_2m"]
+                    humidity = weather["relative_humidity_2m"]
+                    rainfall = weather["precipitation"]
+                    rain = weather["rain"]
+
+                    st.subheader("🌦️ Current Weather Details")
+                    st.write("Temperature:", temperature, "°C")
+                    st.write("Humidity:", humidity, "%")
+                    st.write("Rainfall:", rainfall, "mm")
+                    st.write("Rain:", rain, "mm")
+
+                    # Initial environmental risk indicator
+                    risk_score = 0
+
+                    if humidity >= 85:
+                        risk_score += 40
+                    elif humidity >= 70:
+                        risk_score += 25
+                    elif humidity >= 60:
+                        risk_score += 10
+
+                    if 25 <= temperature <= 32:
+                        risk_score += 30
+                    elif 20 <= temperature < 25 or 32 < temperature <= 35:
+                        risk_score += 15
+
+                    if rainfall >= 5:
+                        risk_score += 30
+                    elif rainfall > 0:
+                        risk_score += 15
+
+                    risk_score = min(risk_score, 100)
+
+                    st.subheader("🌱 Environmental Risk Indicator")
+                    st.write("Risk Score:", risk_score, "/100")
+
+                    if risk_score < 40:
+                        st.success("Low Environmental Risk")
+                    elif risk_score < 70:
+                        st.warning("Moderate Environmental Risk")
+                    else:
+                        st.error("High Environmental Risk")
+
+                    st.caption(
+                        "This is an initial rule-based environmental indicator, "
+                        "not a scientifically validated disease probability."
+                    )
+
+                except Exception as e:
+                    st.error(f"Unable to retrieve weather: {e}")
+
+        else:
+            st.info("Please allow location access to detect your location.")
+
+
