@@ -147,12 +147,7 @@ if uploaded_file is not None:
 
         st.info("This is an AI-assisted prediction, not a confirmed agricultural diagnosis.")
 # GPS Location Detection
-st.divider()
-st.subheader("📍 Farmer Location Detection")
-
-st.write("Click below and allow location access.")
 st.subheader("📍 GPS Location Test")
-
 components.html(
     """
     <button onclick="getLocation()">Get My Location</button>
