@@ -67,9 +67,11 @@ if uploaded_file is not None:
 st.info("This is an AI-assisted prediction, not a confirmed agricultural diagnosis.")
 
 
+
 # GPS Location Detection
 
 from streamlit_geolocation import streamlit_geolocation
+import requests
 
 st.divider()
 st.subheader("📍 Farmer Location Detection")
@@ -79,20 +81,16 @@ st.write("Click below and allow location access.")
 location = streamlit_geolocation()
 
 if location and location.get("latitude") is not None:
+
     latitude = location["latitude"]
     longitude = location["longitude"]
 
     st.success("Location detected successfully!")
+
     st.write(f"Latitude: {latitude}")
     st.write(f"Longitude: {longitude}")
-else:
-    st.info("Please allow location access to detect your location.")
-
-
 
     # Weather Information
-
-    import requests
 
     st.subheader("🌦️ Local Weather Information")
 
@@ -108,7 +106,12 @@ else:
         }
 
         try:
-            response = requests.get(url, params=params, timeout=20)
+            response = requests.get(
+                url,
+                params=params,
+                timeout=20
+            )
+
             response.raise_for_status()
 
             weather = response.json()
@@ -119,28 +122,17 @@ else:
             col1, col2 = st.columns(2)
 
             with col1:
-                st.metric(
-                    "Temperature",
-                    f'{current["temperature_2m"]} °C'
-                )
-
-                st.metric(
-                    "Humidity",
-                    f'{current["relative_humidity_2m"]} %'
-                )
+                st.metric("Temperature", f'{current["temperature_2m"]} °C')
+                st.metric("Humidity", f'{current["relative_humidity_2m"]} %')
 
             with col2:
-                st.metric(
-                    "Rainfall",
-                    f'{current["precipitation"]} mm'
-                )
-
-                st.metric(
-                    "Rain",
-                    f'{current["rain"]} mm'
-                )
+                st.metric("Rainfall", f'{current["precipitation"]} mm')
+                st.metric("Rain", f'{current["rain"]} mm')
 
             st.caption("Weather data source: Open-Meteo")
 
         except Exception as e:
             st.error(f"Unable to retrieve weather: {e}")
+
+else:
+    st.info("Please allow location access to detect your location.")
