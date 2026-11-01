@@ -1,5 +1,5 @@
 import requests
-from streamlit_geolocation import streamlit_geolocation
+import streamlit.components.v1 as components
 import streamlit as st
 import tensorflow as tf
 import numpy as np
@@ -151,11 +151,41 @@ st.divider()
 st.subheader("📍 Farmer Location Detection")
 
 st.write("Click below and allow location access.")
+st.subheader("📍 GPS Location Test")
 
-location = streamlit_geolocation()
+components.html(
+    """
+    <button onclick="getLocation()">Get My Location</button>
+    <p id="result">Click the button to detect location.</p>
 
-st.write("GPS Debug Output:", location)
+    <script>
+    function getLocation() {
+        const result = document.getElementById("result");
 
+        if (!navigator.geolocation) {
+            result.innerHTML = "Geolocation is not supported by this browser.";
+            return;
+        }
+
+        result.innerHTML = "Getting location...";
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                result.innerHTML =
+                    "Latitude: " + position.coords.latitude +
+                    "<br>Longitude: " + position.coords.longitude;
+            },
+            function(error) {
+                result.innerHTML = "GPS Error: " + error.message +
+                    " (Code: " + error.code + ")";
+            },
+            {enableHighAccuracy: true, timeout: 15000}
+        );
+    }
+    </script>
+    """,
+    height=150
+)
 if location:
     latitude = location.get("latitude")
     longitude = location.get("longitude")
